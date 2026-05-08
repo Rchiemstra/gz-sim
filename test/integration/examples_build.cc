@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include <string>
+#include <cstdlib>
 
 #include <gz/common/Console.hh>
 #include <gz/common/Filesystem.hh>
@@ -104,14 +105,40 @@ void ExamplesBuild::Build(const ExampleEntry &_entry)
   ASSERT_TRUE(tmpBuildDir.Valid());
   gzdbg << "Build directory: " << tmpBuildDir.Path() << std::endl;
 
-  char cmd[1024];
+  auto envOrEmpty = [](const char *_name) -> std::string
+    {
+      const char *v = std::getenv(_name);
+      return v ? std::string(v) : std::string();
+    };
 
-  // cd build && cmake source
-  snprintf(cmd, sizeof(cmd), "cd %s && cmake %s",
-    tmpBuildDir.Path().c_str(), _entry.sourceDir.c_str());
+  std::string cmakeArgs = "-S " + _entry.sourceDir + " -B .";
+  const std::string gen = envOrEmpty("GZ_EXAMPLES_TEST_CMAKE_GENERATOR");
+  const std::string makeProg = envOrEmpty("GZ_EXAMPLES_TEST_MAKE_PROGRAM");
+  const std::string cxx = envOrEmpty("GZ_EXAMPLES_TEST_CXX_COMPILER");
+  const std::string cc = envOrEmpty("GZ_EXAMPLES_TEST_C_COMPILER");
+  if (!gen.empty())
+  {
+    cmakeArgs += " -G \"" + gen + "\"";
+  }
+  if (!makeProg.empty())
+  {
+    cmakeArgs += " -DCMAKE_MAKE_PROGRAM=" + makeProg;
+  }
+  if (!cxx.empty())
+  {
+    cmakeArgs += " -DCMAKE_CXX_COMPILER=" + cxx;
+  }
+  if (!cc.empty())
+  {
+    cmakeArgs += " -DCMAKE_C_COMPILER=" + cc;
+  }
 
-  ASSERT_EQ(system(cmd), 0) << _entry.sourceDir;
-  ASSERT_EQ(system("make"), 0);
+  const std::string configureCmd =
+      "cd " + tmpBuildDir.Path() + " && cmake " + cmakeArgs;
+  ASSERT_EQ(system(configureCmd.c_str()), 0) << _entry.sourceDir;
+
+  const std::string buildCmd = "cd " + tmpBuildDir.Path() + " && cmake --build .";
+  ASSERT_EQ(system(buildCmd.c_str()), 0) << _entry.sourceDir;
 }
 
 //////////////////////////////////////////////////

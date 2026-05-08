@@ -167,6 +167,14 @@ endif()
 link_directories(${PROJECT_BINARY_DIR}/test)
 include_directories(${PROJECT_SOURCE_DIR}/test)
 
+if(WIN32)
+  set(_gz_sim_integration_resource_path
+    "${PROJECT_SOURCE_DIR}/test/worlds;${PROJECT_BINARY_DIR}/test/worlds")
+else()
+  set(_gz_sim_integration_resource_path
+    "${PROJECT_SOURCE_DIR}/test/worlds:${PROJECT_BINARY_DIR}/test/worlds")
+endif()
+
 gz_build_tests(TYPE INTEGRATION
   SOURCES
     ${tests}
@@ -175,6 +183,10 @@ gz_build_tests(TYPE INTEGRATION
     ${PROJECT_LIBRARY_TARGET_NAME}-rendering
   ENVIRONMENT
     GZ_SIM_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    GZ_SIM_SYSTEM_PLUGIN_PATH=${GZ_SIM_TEST_SYSTEM_PLUGIN_PATH}
+    GZ_SIM_SERVER_CONFIG_PATH=${PROJECT_SOURCE_DIR}/include/gz/sim/server.config
+    GZ_SIM_GUI_CONFIG_PATH=${PROJECT_SOURCE_DIR}/src/gui/gui.config
+    GZ_SIM_RESOURCE_PATH=${_gz_sim_integration_resource_path}
     GZ_IP=127.0.0.1
 )
 
@@ -248,6 +260,12 @@ endif()
 
 if(TARGET INTEGRATION_examples_build)
   set_tests_properties(INTEGRATION_examples_build PROPERTIES TIMEOUT 320)
+  set_property(TEST INTEGRATION_examples_build APPEND PROPERTY ENVIRONMENT
+    "GZ_EXAMPLES_TEST_CMAKE_GENERATOR=${CMAKE_GENERATOR}"
+    "GZ_EXAMPLES_TEST_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
+    "GZ_EXAMPLES_TEST_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+    "GZ_EXAMPLES_TEST_C_COMPILER=${CMAKE_C_COMPILER}"
+  )
 endif()
 
 if(VALID_DISPLAY AND VALID_DRI_DISPLAY AND TARGET INTEGRATION_sensors_system)

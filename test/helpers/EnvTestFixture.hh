@@ -36,7 +36,37 @@ class InternalFixture : public TestType
   {
     // Augment the system plugin path.  In SetUp to avoid test order issues.
     common::setenv("GZ_SIM_SYSTEM_PLUGIN_PATH",
-           common::joinPaths(std::string(PROJECT_BINARY_PATH), "lib").c_str());
+           GZ_SIM_TEST_SYSTEM_PLUGIN_PATH);
+
+    // Default server/GUI configs and worlds live in the source tree until
+    // `cmake --install` is run; point tests at those paths.
+    const auto serverConfig = common::joinPaths(
+        std::string(PROJECT_SOURCE_PATH), "include", "gz", "sim",
+        "server.config");
+    common::setenv("GZ_SIM_SERVER_CONFIG_PATH", serverConfig.c_str());
+
+    const auto guiConfig = common::joinPaths(
+        std::string(PROJECT_SOURCE_PATH), "src", "gui", "gui.config");
+    common::setenv("GZ_SIM_GUI_CONFIG_PATH", guiConfig.c_str());
+
+#ifdef _WIN32
+    const char kPathSep = ';';
+#else
+    const char kPathSep = ':';
+#endif
+    std::string resourcePaths = common::joinPaths(
+        std::string(PROJECT_SOURCE_PATH), "test", "worlds");
+    resourcePaths += kPathSep;
+    resourcePaths += common::joinPaths(
+        std::string(PROJECT_BINARY_PATH), "test", "worlds");
+    std::string existingResource;
+    if (common::env("GZ_SIM_RESOURCE_PATH", existingResource) &&
+        !existingResource.empty())
+    {
+      resourcePaths += kPathSep;
+      resourcePaths += existingResource;
+    }
+    common::setenv("GZ_SIM_RESOURCE_PATH", resourcePaths.c_str());
 
     common::Console::SetVerbosity(4);
 

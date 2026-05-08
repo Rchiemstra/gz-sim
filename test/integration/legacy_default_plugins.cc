@@ -16,6 +16,7 @@
 */
 
 #include <gtest/gtest.h>
+#include <optional>
 
 #include "gz/sim/Server.hh"
 #include "gz/sim/ServerConfig.hh"
@@ -64,19 +65,25 @@ class LegacyDefaultPluginsTest : public InternalFixture<::testing::Test>
 /////////////////////////////////////////////////
 TEST_F(LegacyDefaultPluginsTest, DoesNotDuplicateDefaultSystems)
 {
-  ServerConfig baselineConfig;
-  baselineConfig.SetSdfString(BaseWorldSdf());
-  Server baselineServer(baselineConfig);
-  EXPECT_TRUE(baselineServer.RunOnce(true));
-  auto baselineCount = baselineServer.SystemCount();
-  ASSERT_TRUE(baselineCount.has_value());
+  std::optional<size_t> baselineCount;
+  {
+    ServerConfig baselineConfig;
+    baselineConfig.SetSdfString(BaseWorldSdf());
+    Server baselineServer(baselineConfig);
+    EXPECT_TRUE(baselineServer.RunOnce(true));
+    baselineCount = baselineServer.SystemCount();
+    ASSERT_TRUE(baselineCount.has_value());
+  }
 
-  ServerConfig legacyConfig;
-  legacyConfig.SetSdfString(LegacyDefaultPluginsWorldSdf());
-  Server legacyServer(legacyConfig);
-  EXPECT_TRUE(legacyServer.RunOnce(true));
-  auto legacyCount = legacyServer.SystemCount();
-  ASSERT_TRUE(legacyCount.has_value());
+  std::optional<size_t> legacyCount;
+  {
+    ServerConfig legacyConfig;
+    legacyConfig.SetSdfString(LegacyDefaultPluginsWorldSdf());
+    Server legacyServer(legacyConfig);
+    EXPECT_TRUE(legacyServer.RunOnce(true));
+    legacyCount = legacyServer.SystemCount();
+    ASSERT_TRUE(legacyCount.has_value());
+  }
 
   EXPECT_EQ(*baselineCount, *legacyCount);
 }

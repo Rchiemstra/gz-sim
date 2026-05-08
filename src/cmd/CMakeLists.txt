@@ -128,7 +128,16 @@ foreach(CMD_TEST
     set(_env_vars)
     list(APPEND _env_vars "GZ_CONFIG_PATH=${CMAKE_BINARY_DIR}/test/conf/$<CONFIG>")
     list(APPEND _env_vars "GZ_IP=127.0.0.1")
-    list(APPEND _env_vars "GZ_SIM_SYSTEM_PLUGIN_PATH=$<TARGET_FILE_DIR:TestModelSystem>")
+    if(WIN32)
+      set(_gz_cmd_plugin_path
+        "$<TARGET_FILE_DIR:TestModelSystem>;${GZ_SIM_TEST_SYSTEM_PLUGIN_PATH}")
+    else()
+      set(_gz_cmd_plugin_path
+        "$<TARGET_FILE_DIR:TestModelSystem>:${GZ_SIM_TEST_SYSTEM_PLUGIN_PATH}")
+    endif()
+    list(APPEND _env_vars "GZ_SIM_SYSTEM_PLUGIN_PATH=${_gz_cmd_plugin_path}")
+    list(APPEND _env_vars
+      "GZ_SIM_SERVER_CONFIG_PATH=${PROJECT_SOURCE_DIR}/include/gz/sim/server.config")
     set_tests_properties(${CMD_TEST} PROPERTIES
       ENVIRONMENT "${_env_vars}")
   endif()

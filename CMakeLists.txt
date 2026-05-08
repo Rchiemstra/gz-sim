@@ -258,6 +258,18 @@ set(GZ_SIM_GUI_PLUGIN_INSTALL_DIR
   ${CMAKE_INSTALL_PREFIX}/${GZ_SIM_GUI_PLUGIN_RELATIVE_INSTALL_DIR}
 )
 
+# Colon-separated (semicolon on Windows) plugin search path for CTest without install.
+set(_gz_sim_test_plugins_build
+  "${CMAKE_BINARY_DIR}/${GZ_LIB_INSTALL_DIR}/gz-${GZ_DESIGNATION}/plugins")
+set(_gz_sim_test_lib_build "${CMAKE_BINARY_DIR}/${GZ_LIB_INSTALL_DIR}")
+if(WIN32)
+  set(GZ_SIM_TEST_SYSTEM_PLUGIN_PATH
+    "${_gz_sim_test_plugins_build};${_gz_sim_test_lib_build}")
+else()
+  set(GZ_SIM_TEST_SYSTEM_PLUGIN_PATH
+    "${_gz_sim_test_plugins_build}:${_gz_sim_test_lib_build}")
+endif()
+
 #============================================================================
 # Configure the build
 #============================================================================

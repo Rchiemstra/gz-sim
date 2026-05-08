@@ -174,6 +174,10 @@ class gz::sim::systems::HydrodynamicsPrivateData
     {
       if (!this->axisComponents[i].empty())
       {
+        if (!this->session[i].has_value())
+        {
+          continue;
+        }
         if (!this->gridField->staticTime)
         {
           this->session[i] =

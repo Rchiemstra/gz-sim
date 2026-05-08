@@ -175,6 +175,17 @@ namespace gui
 std::string defaultGuiConfigFile(bool _isPlayback,
     const char *_customDefaultConfig)
 {
+  // Optional override for CI / uninstalled build trees (mirrors
+  // GZ_SIM_SERVER_CONFIG_PATH).
+  {
+    std::string envGuiConfig;
+    if (common::env("GZ_SIM_GUI_CONFIG_PATH", envGuiConfig) &&
+        !envGuiConfig.empty() && common::exists(envGuiConfig))
+    {
+      return envGuiConfig;
+    }
+  }
+
   std::string defaultConfig;
   std::string defaultGuiConfigName = "gui.config";
   if (nullptr == _customDefaultConfig)
