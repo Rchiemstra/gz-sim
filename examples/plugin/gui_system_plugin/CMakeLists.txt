@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.22.1 FATAL_ERROR)
 
+project(GuiSystemPlugin)
+
 if(ENABLE_GUI)
 
   if(POLICY CMP0100)
     cmake_policy(SET CMP0100 NEW)
   endif()
-
-  project(GuiSystemPlugin)
 
   set(CMAKE_AUTOMOC ON)
 
